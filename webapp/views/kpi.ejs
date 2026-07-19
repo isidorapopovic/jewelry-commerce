@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>KPI Dashboard</title>
+    <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body data-page="kpi">
+    <aside class="side-nav" aria-label="Main navigation">
+        <div class="side-nav-inner">
+            <div class="side-brand">
+                <span class="dot"></span>
+                <span class="side-brand-text">Firma</span>
+            </div>
+
+            <nav class="side-menu">
+                <a href="/" data-nav="home" class="side-link">
+                    <span class="side-icon">⌂</span>
+                    <span class="side-text">Home</span>
+                </a>
+                <a href="/overview" data-nav="overview" class="side-link">
+                    <span class="side-icon">◫</span>
+                    <span class="side-text">Overview</span>
+                </a>
+                <a href="/kpi" data-nav="kpi" class="side-link">
+                    <span class="side-icon">◩</span>
+                    <span class="side-text">KPI</span>
+                </a>
+                <a href="/transactions" data-nav="transactions" class="side-link">
+                    <span class="side-icon">⇄</span>
+                    <span class="side-text">Transactions</span>
+                </a>
+                <a href="/automation" data-nav="automation" class="side-link">
+                    <span class="side-icon">⚙</span>
+                    <span class="side-text">Automation</span>
+                </a>
+                <a href="/visualizations" data-nav="visualizations" class="side-link">
+                    <span class="side-icon">◔</span>
+                    <span class="side-text">Visualizations</span>
+                </a>
+				<a href="/products" data-nav="products" class="side-link">
+					<span class="side-icon">▣</span>
+					<span class="side-text">Products</span>
+				</a>
+				<a href="/imports" data-nav="imports" class="side-link">
+					<span class="side-icon">⇪</span>
+					<span class="side-text">Imports</span>
+				</a>
+            </nav>
+        </div>
+    </aside>
+
+    <main class="page-shell app-page-shell">
+        <div class="container">
+            <section class="hero">
+                <h1>KPI Dashboard</h1>
+                <p>Totals + category breakdown computed from transactions.</p>
+            </section>
+
+            <section class="panel">
+                <h2>Totals</h2>
+                <div id="kpiTotals" class="note">Loading…</div>
+            </section>
+
+            <section class="panel">
+                <h2>By category</h2>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Income</th>
+                            <th>Expense</th>
+                            <th>Net</th>
+                        </tr>
+                    </thead>
+                    <tbody id="kpiByCategory"></tbody>
+                </table>
+                <p class="note" style="margin-top:10px;">
+                    Tip: add transactions in “Transactions Hub” and refresh this page to see KPIs update.
+                </p>
+            </section>
+
+            <div id="toast" class="toast" role="status" aria-live="polite"></div>
+        </div>
+    </main>
+
+    <script src="/js/main.js"></script>
+</body>
+</html>

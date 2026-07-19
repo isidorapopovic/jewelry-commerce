@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Firma Web App</title>
+    <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body data-page="home" class="landing-layout">
+    <div class="mesh-bg" aria-hidden="true"></div>
+
+    <aside class="side-nav" aria-label="Main navigation">
+        <div class="side-nav-inner">
+            <div class="side-brand">
+                <span class="dot"></span>
+            </div>
+
+            <nav class="side-menu">
+                <a href="/landing" data-nav="home" class="side-link active">
+                    <span class="side-icon">⌂</span>
+                </a>
+                <a href="/overview" data-nav="overview" class="side-link">
+                    <span class="side-icon">◫</span>
+                </a>
+                <a href="/kpi" data-nav="kpi" class="side-link">
+                    <span class="side-icon">◩</span>
+                </a>
+                <a href="/transactions" data-nav="transactions" class="side-link">
+                    <span class="side-icon">⇄</span>
+                </a>
+                <a href="/automation" data-nav="automation" class="side-link">
+                    <span class="side-icon">⚙</span>
+                </a>
+                <a href="/visualizations" data-nav="visualizations" class="side-link">
+                    <span class="side-icon">◔</span>
+                </a>
+				<a href="/products" data-nav="products" class="side-link">
+					<span class="side-icon">▣</span>
+					<span class="side-text">Products</span>
+				</a>
+				<a href="/operations" data-nav="operations" class="side-link">
+					<span class="side-icon">o</span>
+				</a>
+				<a href="/imports" data-nav="imports" class="side-link">
+					<span class="side-icon">⇪</span>
+					<span class="side-text">Imports</span>
+				</a>
+            </nav>
+        </div>
+    </aside>
+
+    <main class="landing-main">
+        <section class="landing-hero">
+            <h1>One place to run your business</h1>
+            <p>
+                Overview, KPIs, transactions, and automations — clean and fast.
+                Each section already works with an API. Next we’ll build real features page-by-page.
+            </p>
+        </section>
+
+        <section class="landing-pillars">
+            <a class="landing-card" href="/overview" aria-label="Go to Business Overview">
+                <div class="landing-card-content">
+                    <h3>Business Overview</h3>
+                    <p>Snapshot totals, counts, and latest activity.</p>
+                </div>
+                <div class="landing-card-footer">
+                    <span class="landing-badge">Open</span>
+                    <span class="landing-arrow">→</span>
+                </div>
+            </a>
+
+            <a class="landing-card" href="/kpi" aria-label="Go to KPI Dashboard">
+                <div class="landing-card-content">
+                    <h3>KPI Dashboard</h3>
+                    <p>Income, expense, net, and category performance.</p>
+                </div>
+                <div class="landing-card-footer">
+                    <span class="landing-badge">Open</span>
+                    <span class="landing-arrow">→</span>
+                </div>
+            </a>
+
+            <a class="landing-card" href="/transactions" aria-label="Go to Transactions Hub">
+                <div class="landing-card-content">
+                    <h3>Transactions Hub</h3>
+                    <p>Add, review, and delete transactions (CRUD).</p>
+                </div>
+                <div class="landing-card-footer">
+                    <span class="landing-badge">Open</span>
+                    <span class="landing-arrow">→</span>
+                </div>
+            </a>
+
+            <a class="landing-card" href="/automation" aria-label="Go to Automation Center">
+                <div class="landing-card-content">
+                    <h3>Automation Center</h3>
+                    <p>Create automations, enable/disable, and delete.</p>
+                </div>
+                <div class="landing-card-footer">
+                    <span class="landing-badge">Open</span>
+                    <span class="landing-arrow">→</span>
+                </div>
+            </a>
+        </section>
+
+        <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    </main>
+
+    <script src="/js/main.js"></script>
+</body>
+</html>

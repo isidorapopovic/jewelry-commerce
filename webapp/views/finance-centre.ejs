@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Finance Centre</title>
+    <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body data-page="finance-centre">
+    <aside class="side-nav" aria-label="Main navigation">
+        <div class="side-nav-inner">
+            <div class="side-brand">
+                <span class="dot"></span>
+                <span class="side-brand-text">Firma</span>
+            </div>
+
+            <nav class="side-menu">
+                <a href="/" data-nav="home" class="side-link">
+                    <span class="side-icon">⌂</span>
+                    <span class="side-text">Home</span>
+                </a>
+                <a href="/overview" data-nav="overview" class="side-link">
+                    <span class="side-icon">◫</span>
+                    <span class="side-text">Overview</span>
+                </a>
+                <a href="/kpi" data-nav="kpi" class="side-link">
+                    <span class="side-icon">◩</span>
+                    <span class="side-text">KPI</span>
+                </a>
+                <a href="/transactions" data-nav="transactions" class="side-link">
+                    <span class="side-icon">⇄</span>
+                    <span class="side-text">Transactions</span>
+                </a>
+                <a href="/automation" data-nav="automation" class="side-link">
+                    <span class="side-icon">⚙</span>
+                    <span class="side-text">Automation</span>
+                </a>
+                <a href="/visualizations" data-nav="visualizations" class="side-link">
+                    <span class="side-icon">◔</span>
+                    <span class="side-text">Visualizations</span>
+                </a>
+                <a href="/finance-centre" data-nav="finance-centre" class="side-link active">
+                    <span class="side-icon">€</span>
+                    <span class="side-text">Finance Centre</span>
+                </a>
+				<a href="/products" data-nav="products" class="side-link">
+					<span class="side-icon">▣</span>
+					<span class="side-text">Products</span>
+				</a>
+				<a href="/imports" data-nav="imports" class="side-link">
+					<span class="side-icon">⇪</span>
+					<span class="side-text">Imports</span>
+				</a>
+            </nav>
+        </div>
+    </aside>
+
+    <main class="page-shell app-page-shell finance-page-shell">
+        <div class="container finance-stack">
+            <div class="finance-actions">
+                <a class="btn" href="/transactions">Back to Transactions</a>
+            </div>
+
+            <section class="hero">
+                <div>
+                    <h1>Finance Centre</h1>
+                    <p>Manage recurring transactions, bills, and invoices from one place.</p>
+                </div>
+            </section>
+
+            <section class="panel">
+                <h2>Quick actions</h2>
+                <p class="finance-kicker">Refresh all finance sections and review data returned by the backend.</p>
+                <div class="finance-form-actions">
+                    <button class="btn" type="button" onclick="loadAll()">Refresh everything</button>
+                </div>
+                <div class="finance-subtle-row">
+                    <span class="inline-code">/api/recurring-transactions</span>
+                    <span class="inline-code">/api/bills</span>
+                    <span class="inline-code">/api/invoices</span>
+                </div>
+                <div id="globalMessage" class="feedback"></div>
+            </section>
+
+            <section class="panel">
+                <h2>Create recurring transaction</h2>
+                <form class="form" onsubmit="event.preventDefault(); createRecurringTransaction();">
+                    <div class="finance-form-grid">
+                        <div class="field">
+                            <label for="rt-name">Name</label>
+                            <input id="rt-name" placeholder="Name" />
+                        </div>
+
+                        <div class="field">
+                            <label for="rt-amount">Amount</label>
+                            <input id="rt-amount" type="number" step="0.01" placeholder="100.00" />
+                        </div>
+
+                        <div class="field">
+                            <label for="rt-type">Type</label>
+                            <select id="rt-type">
+                                <option value="expense">expense</option>
+                                <option value="income">income</option>
+                            </select>
+                        </div>
+
+                        <div class="field">
+                            <label for="rt-frequency">Frequency</label>
+                            <select id="rt-frequency">
+                                <option value="monthly">monthly</option>
+                                <option value="weekly">weekly</option>
+                                <option value="biweekly">biweekly</option>
+                                <option value="quarterly">quarterly</option>
+                                <option value="yearly">yearly</option>
+                                <option value="daily">daily</option>
+                            </select>
+                        </div>
+
+                        <div class="field">
+                            <label for="rt-start-date">Start date</label>
+                            <input id="rt-start-date" type="date" />
+                        </div>
+
+                        <div class="field">
+                            <label for="rt-category">Category</label>
+                            <input id="rt-category" placeholder="Category" />
+                        </div>
+                    </div>
+
+                    <div class="finance-form-actions">
+                        <button class="btn" type="submit">Create recurring transaction</button>
+                    </div>
+                </form>
+
+                <div id="rtCreateMessage" class="feedback"></div>
+            </section>
+
+            <section class="panel">
+                <h2>Recurring transactions</h2>
+                <div class="finance-form-actions">
+                    <button class="btn" type="button" onclick="loadRecurringTransactions()">Refresh recurring transactions</button>
+                </div>
+                <div id="recurringError" class="feedback"></div>
+                <div class="finance-table-wrap" id="recurringTable"></div>
+            </section>
+
+            <section class="panel">
+                <h2>Bills</h2>
+                <div class="finance-form-actions">
+                    <button class="btn" type="button" onclick="loadBills()">Refresh bills</button>
+                </div>
+                <div id="billsError" class="feedback"></div>
+                <div class="finance-table-wrap" id="billsTable"></div>
+            </section>
+
+            <section class="panel">
+                <h2>Invoices</h2>
+                <div class="finance-form-actions">
+                    <button class="btn" type="button" onclick="loadInvoices()">Refresh invoices</button>
+                </div>
+                <div id="invoicesError" class="feedback"></div>
+                <div class="finance-table-wrap" id="invoicesTable"></div>
+            </section>
+
+            <div id="toast" class="toast" role="status" aria-live="polite"></div>
+        </div>
+    </main>
+
+    <script>
+        function setMessage(id, type, text) {
+            const el = document.getElementById(id);
+            if (!el) return;
+
+            el.className = 'feedback' + (type ? ' ' + type : '');
+            el.textContent = text || '';
+        }
+
+        function escapeHtml(value) {
+            if (value === null || value === undefined) return '';
+            return String(value)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
+
+        function renderTable(containerId, rows, columns) {
+            const container = document.getElementById(containerId);
+
+            if (!Array.isArray(rows) || rows.length === 0) {
+                container.innerHTML = '<div class="finance-empty">No data found.</div>';
+                return;
+            }
+
+            const head = columns.map(col => `<th>${escapeHtml(col.label)}</th>`).join('');
+            const body = rows.map(row => {
+                const tds = columns.map(col => {
+                    const value = typeof col.render === 'function' ? col.render(row) : row[col.key];
+                    return `<td>${escapeHtml(value ?? '')}</td>`;
+                }).join('');
+                return `<tr>${tds}</tr>`;
+            }).join('');
+
+            container.innerHTML = `
+                    <table class="table">
+                        <thead>
+                            <tr>${head}</tr>
+                        </thead>
+                        <tbody>
+                            ${body}
+                        </tbody>
+                    </table>
+                `;
+        }
+
+        async function fetchJson(url, options = {}) {
+            const response = await fetch(url, options);
+            const text = await response.text();
+
+            let json = {};
+            try {
+                json = text ? JSON.parse(text) : {};
+            } catch {
+                json = { raw: text };
+            }
+
+            if (!response.ok) {
+                throw new Error(json.error || json.message || `Request failed with status ${response.status}`);
+            }
+
+            return json;
+        }
+
+        async function loadRecurringTransactions() {
+            setMessage('recurringError', '', '');
+            try {
+                const json = await fetchJson('/api/recurring-transactions');
+                const rows = Array.isArray(json.data) ? json.data : [];
+
+                renderTable('recurringTable', rows, [
+                    { key: 'id', label: 'ID' },
+                    { key: 'name', label: 'Name' },
+                    { key: 'type', label: 'Type' },
+                    { key: 'amount', label: 'Amount' },
+                    { key: 'frequency', label: 'Frequency' },
+                    { key: 'next_due_date', label: 'Next due date' },
+                    { key: 'category', label: 'Category' },
+                    { key: 'is_active', label: 'Active' }
+                ]);
+            } catch (err) {
+                document.getElementById('recurringTable').innerHTML = '';
+                setMessage('recurringError', 'error', `Could not load recurring transactions. ${err.message}`);
+            }
+        }
+
+        async function loadBills() {
+            setMessage('billsError', '', '');
+            try {
+                const json = await fetchJson('/api/bills');
+                const rows = Array.isArray(json.data) ? json.data : Array.isArray(json.items) ? json.items : Array.isArray(json) ? json : [];
+
+                renderTable('billsTable', rows, [
+                    { key: 'id', label: 'ID' },
+                    { key: 'name', label: 'Name' },
+                    { key: 'amount', label: 'Amount' },
+                    { key: 'currency', label: 'Currency' },
+                    { key: 'due_date', label: 'Due date' },
+                    { key: 'status', label: 'Status' },
+                    { key: 'category', label: 'Category' }
+                ]);
+            } catch (err) {
+                document.getElementById('billsTable').innerHTML = '';
+                setMessage('billsError', 'error', `Could not load bills. ${err.message}`);
+            }
+        }
+
+        async function loadInvoices() {
+            setMessage('invoicesError', '', '');
+            try {
+                const json = await fetchJson('/api/invoices');
+                const rows = Array.isArray(json.data) ? json.data : Array.isArray(json.items) ? json.items : Array.isArray(json) ? json : [];
+
+                renderTable('invoicesTable', rows, [
+                    { key: 'id', label: 'ID' },
+                    { key: 'client_name', label: 'Client' },
+                    { key: 'amount', label: 'Amount' },
+                    { key: 'currency', label: 'Currency' },
+                    { key: 'issue_date', label: 'Issue date' },
+                    { key: 'due_date', label: 'Due date' },
+                    { key: 'status', label: 'Status' }
+                ]);
+            } catch (err) {
+                document.getElementById('invoicesTable').innerHTML = '';
+                setMessage('invoicesError', 'error', `Could not load invoices. ${err.message}`);
+            }
+        }
+
+        async function createRecurringTransaction() {
+            setMessage('rtCreateMessage', '', '');
+
+            const payload = {
+                name: document.getElementById('rt-name').value.trim(),
+                amount: Number(document.getElementById('rt-amount').value),
+                type: document.getElementById('rt-type').value,
+                frequency: document.getElementById('rt-frequency').value,
+                start_date: document.getElementById('rt-start-date').value,
+                category: document.getElementById('rt-category').value.trim() || null
+            };
+
+            try {
+                await fetchJson('/api/recurring-transactions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                setMessage('rtCreateMessage', 'success', 'Recurring transaction created.');
+                await loadRecurringTransactions();
+            } catch (err) {
+                setMessage('rtCreateMessage', 'error', `Could not create recurring transaction. ${err.message}`);
+            }
+        }
+
+        async function loadAll() {
+            setMessage('globalMessage', '', '');
+            await Promise.all([
+                loadRecurringTransactions(),
+                loadBills(),
+                loadInvoices()
+            ]);
+        }
+
+        loadAll();
+    </script>
+</body>
+</html>

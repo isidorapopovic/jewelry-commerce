@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Imports</title>
+    <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body data-page="imports">
+    <aside class="side-nav" aria-label="Main navigation">
+        <div class="side-nav-inner">
+            <div class="side-brand">
+                <span class="dot"></span>
+                <span class="side-brand-text">Firma</span>
+            </div>
+
+            <nav class="side-menu">
+                <a href="/" data-nav="home" class="side-link">
+                    <span class="side-icon">⌂</span>
+                    <span class="side-text">Home</span>
+                </a>
+                <a href="/overview" data-nav="overview" class="side-link">
+                    <span class="side-icon">◫</span>
+                    <span class="side-text">Overview</span>
+                </a>
+                <a href="/kpi" data-nav="kpi" class="side-link">
+                    <span class="side-icon">◩</span>
+                    <span class="side-text">KPI</span>
+                </a>
+                <a href="/transactions" data-nav="transactions" class="side-link">
+                    <span class="side-icon">⇄</span>
+                    <span class="side-text">Transactions</span>
+                </a>
+                <a href="/automation" data-nav="automation" class="side-link">
+                    <span class="side-icon">⚙</span>
+                    <span class="side-text">Automation</span>
+                </a>
+                <a href="/visualizations" data-nav="visualizations" class="side-link">
+                    <span class="side-icon">◔</span>
+                    <span class="side-text">Visualizations</span>
+                </a>
+                <a href="/products" data-nav="products" class="side-link">
+                    <span class="side-icon">▣</span>
+                    <span class="side-text">Products</span>
+                </a>
+                <a href="/imports" data-nav="imports" class="side-link">
+                    <span class="side-icon">⇪</span>
+                    <span class="side-text">Imports</span>
+                </a>
+            </nav>
+        </div>
+    </aside>
+
+    <main class="page-shell app-page-shell">
+        <div class="container">
+            <section class="hero">
+                <h1>Imports</h1>
+                <p>Upload CSV or Excel files, map fields, preview the data, or enter records manually.</p>
+            </section>
+
+            <section class="imports-grid">
+                <div class="imports-stack">
+                    <section class="panel">
+                        <h2>Upload file</h2>
+
+                        <div class="form-grid">
+                            <div class="form-row-full">
+                                <label for="entity" class="field-label">Import type</label>
+                                <select id="entity" class="select"></select>
+                            </div>
+
+                            <div class="form-row-full">
+                                <label for="file" class="field-label">CSV or XLSX file</label>
+                                <input id="file" type="file" accept=".csv,.xlsx,.xls" />
+                                <div class="imports-help">Supported formats: CSV, XLSX, XLS</div>
+                            </div>
+                        </div>
+
+                        <div class="page-tools">
+                            <div class="page-tools-left imports-actions">
+                                <button id="previewBtn" class="btn" type="button">Preview upload</button>
+                                <button id="importBtn" class="btn" type="button">Import file</button>
+                            </div>
+                            <div class="page-tools-right imports-actions">
+                                <a id="templateLink" class="btn" href="#">Download template</a>
+                            </div>
+                        </div>
+
+                        <div id="uploadResult" class="result-box" style="margin-top:16px;">
+                            <div class="empty-state">No upload action yet.</div>
+                        </div>
+                    </section>
+
+                    <section class="panel">
+                        <h2>Preview</h2>
+                        <div id="previewArea" class="preview-box">
+                            <div class="empty-state">No preview yet.</div>
+                        </div>
+                    </section>
+                </div>
+
+                <div class="imports-stack">
+                    <section class="panel">
+                        <h2>Schema</h2>
+                        <div id="schemaInfo" class="result-box">
+                            <div class="empty-state">Choose an import type to see required and optional fields.</div>
+                        </div>
+                    </section>
+
+                    <section class="panel">
+                        <h2>Manual entry</h2>
+                        <form id="manualForm" class="form-grid"></form>
+                        <div class="imports-actions">
+                            <button id="manualSubmit" class="btn" type="button">Save manual record</button>
+                        </div>
+                        <div id="manualResult" class="result-box" style="margin-top:16px;">
+                            <div class="empty-state">No manual entry submitted yet.</div>
+                        </div>
+                    </section>
+
+                    <section class="panel">
+                        <h2>Import history</h2>
+                        <div class="imports-actions">
+                            <button id="refreshHistory" class="btn" type="button">Refresh history</button>
+                        </div>
+                        <div id="historyArea" class="history-box" style="margin-top:16px;">
+                            <div class="empty-state">No history loaded yet.</div>
+                        </div>
+                    </section>
+                </div>
+            </section>
+
+            <div id="toast" class="toast" role="status" aria-live="polite"></div>
+        </div>
+    </main>
+
+    <script src="/js/main.js"></script>
+    <script>
+        const entityEl = document.getElementById("entity");
+        const schemaInfoEl = document.getElementById("schemaInfo");
+        const manualFormEl = document.getElementById("manualForm");
+        const fileEl = document.getElementById("file");
+        const previewBtn = document.getElementById("previewBtn");
+        const importBtn = document.getElementById("importBtn");
+        const previewArea = document.getElementById("previewArea");
+        const uploadResult = document.getElementById("uploadResult");
+        const manualSubmit = document.getElementById("manualSubmit");
+        const manualResult = document.getElementById("manualResult");
+        const templateLink = document.getElementById("templateLink");
+        const refreshHistoryBtn = document.getElementById("refreshHistory");
+        const historyArea = document.getElementById("historyArea");
+
+        function escapeHtml(value) {
+            return String(value ?? "")
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
+
+        async function loadSchema() {
+            const entity = entityEl.value;
+            const res = await fetch(`/imports/schema/${entity}`);
+            const data = await res.json();
+
+            if (!res.ok) {
+                schemaInfoEl.innerHTML = `<div class="empty-state">${escapeHtml(data.error || "Failed to load schema")}</div>`;
+                return;
+            }
+
+            const schema = data.schema;
+            templateLink.href = `/imports/template/${entity}`;
+
+            schemaInfoEl.innerHTML = `
+                <div>
+                    <strong>${escapeHtml(schema.label)}</strong>
+                    <div class="imports-help">Required fields</div>
+                    <div class="schema-list">
+                        ${schema.required.map(x => `<span class="schema-pill required">${escapeHtml(x)}</span>`).join("")}
+                    </div>
+
+                    <div class="imports-help" style="margin-top:14px;">Optional fields</div>
+                    <div class="schema-list">
+                        ${schema.optional.map(x => `<span class="schema-pill">${escapeHtml(x)}</span>`).join("")}
+                    </div>
+                </div>
+            `;
+
+            renderManualForm(schema);
+        }
+
+        function inputType(field) {
+            if (field.includes("date")) return "date";
+            if ([
+                "amount", "tax_amount", "price", "unit_price", "discount",
+                "tax_rate", "credit_limit", "stock_quantity",
+                "qty_ordered", "qty_shipped", "reorder_point", "total_value", "issue_count"
+            ].includes(field)) {
+                return "number";
+            }
+            return "text";
+        }
+
+        function renderManualForm(schema) {
+            const fields = [...schema.required, ...schema.optional];
+
+            manualFormEl.innerHTML = fields.map(field => `
+                <div class="${field === "notes" || field === "description" ? "form-row-full" : ""}">
+                    <label for="field_${field}" class="field-label">
+                        ${escapeHtml(field)}${schema.required.includes(field) ? " *" : ""}
+                    </label>
+                    ${
+                        field === "notes" || field === "description"
+                            ? `<textarea id="field_${field}" name="${escapeHtml(field)}" class="textarea"></textarea>`
+                            : `<input id="field_${field}" name="${escapeHtml(field)}" type="${inputType(field)}" class="input" />`
+                    }
+                </div>
+            `).join("");
+        }
+
+        function buildFormData() {
+            const file = fileEl.files[0];
+            const fd = new FormData();
+            fd.append("file", file);
+            return fd;
+        }
+
+        async function loadEntities() {
+            const known = [
+                ["customers", "Customers"],
+                ["products", "Products"],
+                ["orders", "Orders"],
+                ["order_items", "Order Items"],
+                ["invoices", "Invoices"],
+                ["bills", "Bills"],
+                ["recurring_transactions", "Recurring Transactions"]
+            ];
+
+            entityEl.innerHTML = known.map(([value, label]) => `
+                <option value="${value}">${label}</option>
+            `).join("");
+
+            await loadSchema();
+        }
+
+        async function previewUpload() {
+            const entity = entityEl.value;
+            const file = fileEl.files[0];
+
+            if (!file) {
+                uploadResult.innerHTML = `<div class="empty-state">Please choose a file first.</div>`;
+                return;
+            }
+
+            uploadResult.innerHTML = `<div class="empty-state">Preparing preview...</div>`;
+
+            const res = await fetch(`/imports/preview/${entity}`, {
+                method: "POST",
+                body: buildFormData()
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                uploadResult.innerHTML = `<div class="empty-state">${escapeHtml(data.error || "Preview failed")}</div>`;
+                previewArea.innerHTML = `<div class="empty-state">Preview failed.</div>`;
+                return;
+            }
+
+            uploadResult.innerHTML = `
+                <div class="status-row">
+                    <span class="status-chip ok">Valid: ${data.validRows}</span>
+                    <span class="status-chip warn">Invalid: ${data.invalidRows}</span>
+                    <span class="status-chip">Total: ${data.totalRows}</span>
+                </div>
+                <div class="imports-help">Detected mapping and first preview rows shown below.</div>
+            `;
+
+            let mappingHtml = `
+                <h3>Detected mapping</h3>
+                <div class="imports-table-wrap">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Field</th>
+                                <th>Detected column</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${Object.entries(data.detectedMapping || {}).map(([field, source]) => `
+                                <tr>
+                                    <td>${escapeHtml(field)}</td>
+                                    <td>${escapeHtml(source)}</td>
+                                </tr>
+                            `).join("")}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            let rowsHtml = `
+                <h3 style="margin-top:18px;">Preview rows</h3>
+                <div class="imports-table-wrap">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Row</th>
+                                <th>Status</th>
+                                <th>Mapped data</th>
+                                <th>Error</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.preview.map((row) => `
+                                <tr>
+                                    <td>${row.row}</td>
+                                    <td>${escapeHtml(row.status)}</td>
+                                    <td><pre>${escapeHtml(JSON.stringify(row.mapped, null, 2))}</pre></td>
+                                    <td>${escapeHtml(row.error || "")}</td>
+                                </tr>
+                            `).join("")}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            previewArea.innerHTML = mappingHtml + rowsHtml;
+        }
+
+        async function importUpload() {
+            const entity = entityEl.value;
+            const file = fileEl.files[0];
+
+            if (!file) {
+                uploadResult.innerHTML = `<div class="empty-state">Please choose a file first.</div>`;
+                return;
+            }
+
+            uploadResult.innerHTML = `<div class="empty-state">Importing file...</div>`;
+
+            const res = await fetch(`/imports/import/${entity}`, {
+                method: "POST",
+                body: buildFormData()
+            });
+
+            const data = await res.json();
+
+            if (!res.ok && res.status !== 207 && res.status !== 422) {
+                uploadResult.innerHTML = `<div class="empty-state">${escapeHtml(data.error || "Import failed")}</div>`;
+                return;
+            }
+
+            uploadResult.innerHTML = `
+                <div class="status-row">
+                    <span class="status-chip ok">Imported: ${Number(data.imported || 0)}</span>
+                    <span class="status-chip warn">Failed: ${Number(data.failed || 0)}</span>
+                    <span class="status-chip">Total: ${Number(data.total || 0)}</span>
+                </div>
+                <pre>${escapeHtml(JSON.stringify(data.errors || [], null, 2))}</pre>
+            `;
+
+            loadHistory();
+        }
+
+        async function submitManual() {
+            const entity = entityEl.value;
+            const payload = {};
+            const fields = manualFormEl.querySelectorAll("input, textarea, select");
+
+            fields.forEach((field) => {
+                payload[field.name] = field.value;
+            });
+
+            manualResult.innerHTML = `<div class="empty-state">Saving...</div>`;
+
+            const res = await fetch(`/imports/manual/${entity}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                manualResult.innerHTML = `<div class="empty-state">${escapeHtml(data.error || "Manual save failed")}</div>`;
+                return;
+            }
+
+            manualResult.innerHTML = `<div class="status-chip ok">${escapeHtml(data.message || "Saved successfully")}</div>`;
+            manualFormEl.reset();
+            loadHistory();
+        }
+
+        async function loadHistory() {
+            const res = await fetch("/imports/history");
+            const data = await res.json();
+
+            if (!res.ok) {
+                historyArea.innerHTML = `<div class="empty-state">${escapeHtml(data.error || "Failed to load history")}</div>`;
+                return;
+            }
+
+            if (!data.data || !data.data.length) {
+                historyArea.innerHTML = `<div class="empty-state">No imports yet.</div>`;
+                return;
+            }
+
+            historyArea.innerHTML = `
+                <div class="imports-table-wrap">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>When</th>
+                                <th>File</th>
+                                <th>Entity</th>
+                                <th>Total</th>
+                                <th>Imported</th>
+                                <th>Failed</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.data.map((row) => `
+                                <tr>
+                                    <td>${escapeHtml(row.imported_at || "")}</td>
+                                    <td>${escapeHtml(row.filename || "")}</td>
+                                    <td>${escapeHtml(row.entity_type || "")}</td>
+                                    <td>${Number(row.rows_total || 0)}</td>
+                                    <td>${Number(row.rows_imported || 0)}</td>
+                                    <td>${Number(row.rows_failed || 0)}</td>
+                                </tr>
+                            `).join("")}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        entityEl.addEventListener("change", loadSchema);
+        previewBtn.addEventListener("click", previewUpload);
+        importBtn.addEventListener("click", importUpload);
+        manualSubmit.addEventListener("click", submitManual);
+        refreshHistoryBtn.addEventListener("click", loadHistory);
+
+        loadEntities();
+        loadHistory();
+    </script>
+</body>
+</html>

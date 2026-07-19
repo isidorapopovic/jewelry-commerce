@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Visualizations</title>
+    <link rel="stylesheet" href="/css/style.css" />
+</head>
+
+<body data-page="visualizations">
+    <aside class="side-nav" aria-label="Main navigation">
+        <div class="side-nav-inner">
+            <div class="side-brand">
+                <span class="dot"></span>
+                <span class="side-brand-text">Firma</span>
+            </div>
+
+            <nav class="side-menu">
+                <a href="/" data-nav="home" class="side-link">
+                    <span class="side-icon">⌂</span>
+                    <span class="side-text">Home</span>
+                </a>
+                <a href="/overview" data-nav="overview" class="side-link">
+                    <span class="side-icon">◫</span>
+                    <span class="side-text">Overview</span>
+                </a>
+                <a href="/kpi" data-nav="kpi" class="side-link">
+                    <span class="side-icon">◩</span>
+                    <span class="side-text">KPI</span>
+                </a>
+                <a href="/transactions" data-nav="transactions" class="side-link">
+                    <span class="side-icon">⇄</span>
+                    <span class="side-text">Transactions</span>
+                </a>
+                <a href="/automation" data-nav="automation" class="side-link">
+                    <span class="side-icon">⚙</span>
+                    <span class="side-text">Automation</span>
+                </a>
+                <a href="/visualizations" data-nav="visualizations" class="side-link">
+                    <span class="side-icon">◔</span>
+                    <span class="side-text">Visualizations</span>
+                </a>
+				<a href="/products" data-nav="products" class="side-link">
+					<span class="side-icon">▣</span>
+					<span class="side-text">Products</span>
+				</a>
+				<a href="/imports" data-nav="imports" class="side-link">
+					<span class="side-icon">⇪</span>
+					<span class="side-text">Imports</span>
+				</a>
+            </nav>
+        </div>
+    </aside>
+
+    <main class="page-shell app-page-shell">
+        <div class="container container-wide">
+            <section class="hero hero-compact">
+                <h1>Visualizations</h1>
+                <p>Upload an Excel or CSV file, pick columns, and draw charts.</p>
+            </section>
+
+            <section class="viz-layout">
+                <aside class="viz-left">
+                    <section class="panel panel-compact">
+                        <h2 class="h2-compact">Data</h2>
+
+                        <div class="form form-compact">
+                            <div class="field field-compact">
+                                <label for="dataFile">File (.xlsx or .csv)</label>
+                                <input id="dataFile" type="file" accept=".xlsx,.csv" />
+                            </div>
+
+                            <div class="field field-compact">
+                                <label for="sheetSelect">Sheet (Excel only)</label>
+                                <select id="sheetSelect" disabled></select>
+                            </div>
+
+                            <div class="field field-compact">
+                                <label for="xCol">Column 1 (X)</label>
+                                <select id="xCol" disabled></select>
+                            </div>
+
+                            <div class="field field-compact">
+                                <label for="yCol">Column 2 (Y)</label>
+                                <select id="yCol" disabled></select>
+                            </div>
+
+                            <div class="field field-compact">
+                                <label for="chartType">Chart type</label>
+                                <select id="chartType" disabled>
+                                    <option value="bar">Bar</option>
+                                    <option value="line">Line</option>
+                                    <option value="scatter">Scatter (X & Y numeric)</option>
+                                    <option value="hist">Histogram (Y numeric)</option>
+                                </select>
+                            </div>
+
+                            <button class="btn btn-compact" id="drawBtn" disabled>Draw chart</button>
+
+                            <p class="note note-compact">
+                                Tip: Scatter needs numeric X and Y. Bar/Line: Y numeric, X can be text.
+                            </p>
+                        </div>
+                    </section>
+
+                    <section class="panel panel-compact">
+                        <div class="panel-head-compact">
+                            <h2 class="h2-compact">Preview</h2>
+                            <span class="muted" id="rowCount"></span>
+                        </div>
+
+                        <div class="table-wrap table-wrap-compact">
+                            <table class="table table-compact">
+                                <thead id="previewHead"></thead>
+                                <tbody id="previewBody"></tbody>
+                            </table>
+                        </div>
+                    </section>
+                </aside>
+
+                <main class="viz-right">
+                    <section class="panel panel-compact">
+                        <div class="panel-head-compact">
+                            <h2 class="h2-compact">Chart</h2>
+                            <span class="muted" id="chartHint"></span>
+                        </div>
+                        <div class="chart-wrap">
+                            <canvas id="chartCanvas"></canvas>
+                        </div>
+                    </section>
+                </main>
+            </section>
+
+            <div id="toast" class="toast" role="status" aria-live="polite"></div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="/js/main.js"></script>
+</body>
+</html>

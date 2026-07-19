@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Automation Center</title>
+    <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body data-page="automation">
+    <aside class="side-nav" aria-label="Main navigation">
+        <div class="side-nav-inner">
+            <div class="side-brand">
+                <span class="dot"></span>
+                <span class="side-brand-text">Firma</span>
+            </div>
+
+            <nav class="side-menu">
+                <a href="/" data-nav="home" class="side-link">
+                    <span class="side-icon">⌂</span>
+                    <span class="side-text">Home</span>
+                </a>
+                <a href="/overview" data-nav="overview" class="side-link">
+                    <span class="side-icon">◫</span>
+                    <span class="side-text">Overview</span>
+                </a>
+                <a href="/kpi" data-nav="kpi" class="side-link">
+                    <span class="side-icon">◩</span>
+                    <span class="side-text">KPI</span>
+                </a>
+                <a href="/transactions" data-nav="transactions" class="side-link">
+                    <span class="side-icon">⇄</span>
+                    <span class="side-text">Transactions</span>
+                </a>
+                <a href="/automation" data-nav="automation" class="side-link">
+                    <span class="side-icon">⚙</span>
+                    <span class="side-text">Automation</span>
+                </a>
+                <a href="/visualizations" data-nav="visualizations" class="side-link">
+                    <span class="side-icon">◔</span>
+                    <span class="side-text">Visualizations</span>
+                </a>
+				<a href="/products" data-nav="products" class="side-link">
+					<span class="side-icon">▣</span>
+					<span class="side-text">Products</span>
+				</a>
+				<a href="/imports" data-nav="imports" class="side-link">
+					<span class="side-icon">⇪</span>
+					<span class="side-text">Imports</span>
+				</a>
+            </nav>
+        </div>
+    </aside>
+
+    <main class="page-shell app-page-shell">
+        <div class="container">
+            <section class="hero">
+                <h1>Automation Center</h1>
+                <p>Create automations, enable/disable them, and delete them.</p>
+            </section>
+
+            <section class="panel split">
+                <div>
+                    <h2>Automations</h2>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Schedule</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="autoTableBody"></tbody>
+                    </table>
+                </div>
+
+                <div>
+                    <h2>Add automation</h2>
+                    <form id="autoForm" class="form">
+                        <div class="field">
+                            <label for="autoName">Name</label>
+                            <input id="autoName" placeholder="Monthly invoice reminder" required />
+                        </div>
+
+                        <div class="field">
+                            <label for="autoSchedule">Schedule</label>
+                            <input id="autoSchedule" placeholder="Every 1st day at 10:00" required />
+                        </div>
+
+                        <button class="btn" type="submit">Create</button>
+
+                        <p class="note">
+                            Later we’ll connect real jobs (cron/queue) + permissions + logs.
+                        </p>
+                    </form>
+                </div>
+            </section>
+
+            <div id="toast" class="toast" role="status" aria-live="polite"></div>
+        </div>
+    </main>
+
+    <script src="/js/main.js"></script>
+</body>
+</html>
