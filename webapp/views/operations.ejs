@@ -1,374 +1,330 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title><%= pageTitle %></title>
-  <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title><%= pageTitle %></title>
+    <link rel="stylesheet" href="/css/style.css" />
 </head>
-<body class="min-h-screen bg-slate-50 text-slate-900">
-  <%
-    function formatMoney(value) {
-      return new Intl.NumberFormat('en-GB', {
-        style: 'currency',
-        currency: 'EUR',
-        maximumFractionDigits: 2
-      }).format(Number(value || 0));
-    }
+<body data-page="operations">
+    <%
+        function formatMoney(value) {
+            return new Intl.NumberFormat('en-GB', {
+                style: 'currency',
+                currency: 'EUR',
+                maximumFractionDigits: 2
+            }).format(Number(value || 0));
+        }
 
-    function formatDate(value) {
-      if (!value) return '—';
-      return new Date(value).toLocaleDateString('en-GB');
-    }
+        function formatDate(value) {
+            if (!value) return '—';
+            return new Date(value).toLocaleDateString('en-GB');
+        }
 
-    function daysLate(value) {
-      if (!value) return 0;
-      const today = new Date();
-      const date = new Date(value);
-      today.setHours(0, 0, 0, 0);
-      date.setHours(0, 0, 0, 0);
-      const diff = today - date;
-      return Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
-    }
+        function daysLate(value) {
+            if (!value) return 0;
+            const today = new Date();
+            const date = new Date(value);
+            today.setHours(0, 0, 0, 0);
+            date.setHours(0, 0, 0, 0);
+            return Math.max(0, Math.floor((today - date) / (1000 * 60 * 60 * 24)));
+        }
 
-    function badgeClass(value) {
-      const map = {
-        'New': 'bg-slate-100 text-slate-700',
-        'Approved': 'bg-blue-100 text-blue-700',
-        'Picking': 'bg-amber-100 text-amber-800',
-        'Packed': 'bg-indigo-100 text-indigo-700',
-        'Out for delivery': 'bg-purple-100 text-purple-700',
-        'Delivered': 'bg-emerald-100 text-emerald-700',
-        'Partially delivered': 'bg-orange-100 text-orange-700',
-        'Blocked': 'bg-red-100 text-red-700',
-        'Cancelled': 'bg-slate-200 text-slate-600',
-        'Unpaid': 'bg-red-100 text-red-700',
-        'Partially Paid': 'bg-amber-100 text-amber-800',
-        'Paid': 'bg-emerald-100 text-emerald-700',
-        'Overdue': 'bg-red-100 text-red-700',
-        'Allocated': 'bg-blue-100 text-blue-700',
-        'Unallocated': 'bg-slate-100 text-slate-700',
-        'Partially Fulfilled': 'bg-orange-100 text-orange-700',
-        'Fulfilled': 'bg-emerald-100 text-emerald-700',
-        'Issue': 'bg-red-100 text-red-700',
-        'low stock': 'bg-amber-100 text-amber-800',
-        'stockout': 'bg-red-100 text-red-700',
-        'negative stock': 'bg-red-200 text-red-800',
-        'no movement': 'bg-slate-100 text-slate-700',
-        'no movement 30d': 'bg-slate-100 text-slate-700',
-        'no movement 60d': 'bg-slate-200 text-slate-700',
-        'no movement 90d': 'bg-slate-300 text-slate-800',
-        'ok': 'bg-emerald-100 text-emerald-700',
-        'Delayed': 'bg-red-100 text-red-700',
-        'Scheduled': 'bg-blue-100 text-blue-700',
-        'In Progress': 'bg-amber-100 text-amber-800'
-      };
+        function badgeTint(value) {
+            const good = ['Delivered', 'Paid', 'Fulfilled', 'Allocated', 'ok', 'Approved'];
+            const warn = ['Picking', 'Packed', 'Out for delivery', 'Partially delivered',
+                'Partially Paid', 'Partially Fulfilled', 'low stock', 'no movement',
+                'no movement 30d', 'no movement 60d', 'no movement 90d', 'In Progress', 'Scheduled'];
+            const bad = ['Blocked', 'Cancelled', 'Unpaid', 'Overdue', 'Issue',
+                'stockout', 'negative stock', 'Delayed'];
+            if (good.includes(value)) return 'is-good';
+            if (warn.includes(value)) return 'is-warn';
+            if (bad.includes(value)) return 'is-bad';
+            return '';
+        }
 
-      return map[value] || 'bg-slate-100 text-slate-700';
-    }
+        const attentionCount =
+            (lateOrders?.length || 0) +
+            (overdueCustomers?.length || 0) +
+            (delayedDeliveries?.length || 0) +
+            (inventory?.filter(i => i.alert !== 'ok').length || 0);
 
-    const attentionCount =
-      (lateOrders?.length || 0) +
-      (overdueCustomers?.length || 0) +
-      (delayedDeliveries?.length || 0) +
-      (inventory?.filter(i => i.alert !== 'ok').length || 0);
-  %>
+        const inventoryAlerts = inventory.filter(item => item.alert !== 'ok');
+    %>
 
-  <div class="mx-auto max-w-7xl p-6 space-y-6">
-    <div>
-      <h1 class="text-2xl font-bold">Operations Control Tower</h1>
-      <p class="mt-1 text-sm text-slate-600">
-        A quick daily view of orders, stock, deliveries, and collections.
-      </p>
-    </div>
+    <aside class="side-nav" aria-label="Main navigation">
+        <div class="side-nav-inner">
+            <div class="side-brand">
+                <span class="dot"></span>
+                <span class="side-brand-text">Firma</span>
+            </div>
 
-    <div class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-      <strong>Needs attention today:</strong>
-      <%= attentionCount %> active issues across late orders, overdue accounts, delayed deliveries, and stock alerts.
-    </div>
-
-    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">
-      <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-        <div class="text-sm text-slate-500">Orders due today</div>
-        <div class="mt-2 text-3xl font-semibold"><%= kpis.orders_due_today || 0 %></div>
-      </div>
-      <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-        <div class="text-sm text-slate-500">Orders late</div>
-        <div class="mt-2 text-3xl font-semibold"><%= kpis.orders_late || 0 %></div>
-      </div>
-      <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-        <div class="text-sm text-slate-500">Low stock SKUs</div>
-        <div class="mt-2 text-3xl font-semibold"><%= kpis.low_stock_skus || 0 %></div>
-      </div>
-      <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-        <div class="text-sm text-slate-500">Deliveries in progress</div>
-        <div class="mt-2 text-3xl font-semibold"><%= kpis.deliveries_in_progress || 0 %></div>
-      </div>
-      <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-        <div class="text-sm text-slate-500">Overdue invoices</div>
-        <div class="mt-2 text-3xl font-semibold"><%= kpis.overdue_invoices || 0 %></div>
-      </div>
-      <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-        <div class="text-sm text-slate-500">Today’s sales</div>
-        <div class="mt-2 text-3xl font-semibold"><%= formatMoney(kpis.todays_sales) %></div>
-      </div>
-      <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-        <div class="text-sm text-slate-500">This week’s collections</div>
-        <div class="mt-2 text-3xl font-semibold"><%= formatMoney(kpis.this_week_collections) %></div>
-      </div>
-      <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-        <div class="text-sm text-slate-500">Fill rate</div>
-        <div class="mt-2 text-3xl font-semibold"><%= Number(kpis.fill_rate || 0).toFixed(2) %>%</div>
-      </div>
-      <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-        <div class="text-sm text-slate-500">Order accuracy</div>
-        <div class="mt-2 text-3xl font-semibold"><%= Number(kpis.order_accuracy || 0).toFixed(2) %>%</div>
-      </div>
-    </div>
-
-    <div class="grid gap-6 xl:grid-cols-2">
-      <section class="rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div class="border-b border-slate-100 px-4 py-3">
-          <h2 class="text-base font-semibold">Late orders</h2>
+            <nav class="side-menu">
+                <a href="/" data-nav="home" class="side-link">
+                    <span class="side-icon">⌂</span>
+                    <span class="side-text">Home</span>
+                </a>
+                <a href="/overview" data-nav="overview" class="side-link">
+                    <span class="side-icon">◫</span>
+                    <span class="side-text">Overview</span>
+                </a>
+                <a href="/kpi" data-nav="kpi" class="side-link">
+                    <span class="side-icon">◩</span>
+                    <span class="side-text">KPI</span>
+                </a>
+                <a href="/operations" data-nav="operations" class="side-link active">
+                    <span class="side-icon">◎</span>
+                    <span class="side-text">Operations</span>
+                </a>
+                <a href="/transactions" data-nav="transactions" class="side-link">
+                    <span class="side-icon">⇄</span>
+                    <span class="side-text">Transactions</span>
+                </a>
+                <a href="/automation" data-nav="automation" class="side-link">
+                    <span class="side-icon">⚙</span>
+                    <span class="side-text">Automation</span>
+                </a>
+                <a href="/visualizations" data-nav="visualizations" class="side-link">
+                    <span class="side-icon">◔</span>
+                    <span class="side-text">Visualizations</span>
+                </a>
+                <a href="/products" data-nav="products" class="side-link">
+                    <span class="side-icon">▣</span>
+                    <span class="side-text">Products</span>
+                </a>
+                <a href="/imports" data-nav="imports" class="side-link">
+                    <span class="side-icon">⇪</span>
+                    <span class="side-text">Imports</span>
+                </a>
+            </nav>
         </div>
-        <div class="p-4 space-y-3">
-          <% if (lateOrders.length) { %>
-            <% lateOrders.forEach(order => { %>
-              <div class="rounded-xl border border-slate-200 p-3">
-                <div class="flex flex-wrap items-center justify-between gap-2">
-                  <div>
-                    <div class="font-medium"><%= order.order_number %> · <%= order.customer %></div>
-                    <div class="text-sm text-slate-500">
-                      Requested <%= formatDate(order.requested_delivery_date) %> ·
-                      <%= daysLate(order.requested_delivery_date) %> day(s) late
-                    </div>
-                  </div>
-                  <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium <%= badgeClass(order.status) %>">
-                    <%= order.status %>
-                  </span>
+    </aside>
+
+    <main class="page-shell app-page-shell">
+        <div class="ops-container">
+
+            <section class="hero">
+                <div>
+                    <h1>Operations Control Tower</h1>
+                    <p>A quick daily view of orders, stock, deliveries, and collections.</p>
                 </div>
-                <div class="mt-2 flex flex-wrap gap-2 text-xs text-slate-600">
-                  <span>Total <%= formatMoney(order.total_value) %></span>
-                  <span>•</span>
-                  <span>Payment <%= order.payment_status %></span>
-                  <span>•</span>
-                  <span>Fulfilment <%= order.fulfilment_status %></span>
-                  <span>•</span>
-                  <span><%= order.assigned_driver_or_route || 'No route assigned' %></span>
+                <a href="/operations" class="ops-refresh-btn">↻ Refresh</a>
+            </section>
+
+            <div class="attention">
+                <strong>Needs attention today:</strong>
+                <%= attentionCount %> active issues across late orders, overdue accounts,
+                delayed deliveries, and stock alerts.
+            </div>
+
+            <section class="ops-stats">
+                <div class="kpi"><div class="label">Orders due today</div><div class="value"><%= kpis.orders_due_today || 0 %></div></div>
+                <div class="kpi"><div class="label">Orders late</div><div class="value"><%= kpis.orders_late || 0 %></div></div>
+                <div class="kpi"><div class="label">Low stock SKUs</div><div class="value"><%= kpis.low_stock_skus || 0 %></div></div>
+                <div class="kpi"><div class="label">Deliveries in progress</div><div class="value"><%= kpis.deliveries_in_progress || 0 %></div></div>
+                <div class="kpi"><div class="label">Overdue invoices</div><div class="value"><%= kpis.overdue_invoices || 0 %></div></div>
+                <div class="kpi"><div class="label">Today’s sales</div><div class="value"><%= formatMoney(kpis.todays_sales) %></div></div>
+                <div class="kpi"><div class="label">This week’s collections</div><div class="value"><%= formatMoney(kpis.this_week_collections) %></div></div>
+                <div class="kpi"><div class="label">Fill rate</div><div class="value"><%= Number(kpis.fill_rate || 0).toFixed(1) %>%</div></div>
+                <div class="kpi"><div class="label">Order accuracy</div><div class="value"><%= Number(kpis.order_accuracy || 0).toFixed(1) %>%</div></div>
+            </section>
+
+            <div class="split">
+                <section class="panel">
+                    <h2>Late orders</h2>
+                    <% if (lateOrders.length) { %>
+                        <% lateOrders.forEach(order => { %>
+                            <div class="ops-card">
+                                <div class="ops-card-head">
+                                    <div>
+                                        <div class="ops-card-title"><%= order.order_number %> · <%= order.customer %></div>
+                                        <div class="ops-card-sub">
+                                            Requested <%= formatDate(order.requested_delivery_date) %> ·
+                                            <%= daysLate(order.requested_delivery_date) %> day(s) late
+                                        </div>
+                                    </div>
+                                    <span class="badge <%= badgeTint(order.status) %>"><%= order.status %></span>
+                                </div>
+                                <div class="ops-card-meta">
+                                    <span>Total <%= formatMoney(order.total_value) %></span>
+                                    <span>•</span>
+                                    <span>Payment <%= order.payment_status %></span>
+                                    <span>•</span>
+                                    <span>Fulfilment <%= order.fulfilment_status %></span>
+                                    <span>•</span>
+                                    <span><%= order.assigned_driver_or_route || 'No route assigned' %></span>
+                                </div>
+                                <% if (order.notes) { %>
+                                    <div class="ops-card-note"><%= order.notes %></div>
+                                <% } %>
+                            </div>
+                        <% }) %>
+                    <% } else { %>
+                        <p class="note">No late orders.</p>
+                    <% } %>
+                </section>
+
+                <section class="panel">
+                    <h2>Delayed deliveries</h2>
+                    <% if (delayedDeliveries.length) { %>
+                        <% delayedDeliveries.forEach(delivery => { %>
+                            <div class="ops-card">
+                                <div class="ops-card-head">
+                                    <div>
+                                        <div class="ops-card-title"><%= delivery.order_number %> · <%= delivery.customer %></div>
+                                        <div class="ops-card-sub">Scheduled <%= formatDate(delivery.scheduled_date) %></div>
+                                    </div>
+                                    <span class="badge <%= badgeTint(delivery.status) %>"><%= delivery.status %></span>
+                                </div>
+                                <div class="ops-card-meta"><span>Assigned: <%= delivery.assigned %></span></div>
+                            </div>
+                        <% }) %>
+                    <% } else { %>
+                        <p class="note">No delayed deliveries.</p>
+                    <% } %>
+                </section>
+            </div>
+
+            <div class="split">
+                <section class="panel">
+                    <h2>Customers who owe money</h2>
+                    <% if (overdueCustomers.length) { %>
+                        <div class="table-wrap">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Customer</th>
+                                        <th>Overdue invoices</th>
+                                        <th>Overdue amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% overdueCustomers.forEach(customer => { %>
+                                        <tr>
+                                            <td><%= customer.name %></td>
+                                            <td><%= customer.overdue_invoice_count %></td>
+                                            <td><%= formatMoney(customer.overdue_amount) %></td>
+                                        </tr>
+                                    <% }) %>
+                                </tbody>
+                            </table>
+                        </div>
+                    <% } else { %>
+                        <p class="note">No overdue customers.</p>
+                    <% } %>
+                </section>
+
+                <section class="panel">
+                    <h2>Inventory alerts</h2>
+                    <% if (inventoryAlerts.length) { %>
+                        <% inventoryAlerts.forEach(item => { %>
+                            <div class="ops-card">
+                                <div class="ops-card-head">
+                                    <div>
+                                        <div class="ops-card-title"><%= item.sku_code %> · <%= item.name %></div>
+                                        <div class="ops-card-sub">
+                                            <%= item.category || 'Uncategorised' %> · <%= item.supplier || 'No supplier' %>
+                                        </div>
+                                    </div>
+                                    <span class="badge <%= badgeTint(item.alert) %>"><%= item.alert %></span>
+                                </div>
+                                <div class="ops-card-meta">
+                                    <span>Current: <%= item.current_stock %></span>
+                                    <span>Allocated: <%= item.allocated_stock %></span>
+                                    <span>Available: <%= item.available_stock %></span>
+                                    <span>Reorder point: <%= item.reorder_point %></span>
+                                </div>
+                                <div class="ops-card-note">Last movement: <%= formatDate(item.last_movement_at) %></div>
+                            </div>
+                        <% }) %>
+                    <% } else { %>
+                        <p class="note">No inventory alerts.</p>
+                    <% } %>
+                </section>
+            </div>
+
+            <section class="panel">
+                <h2>Orders</h2>
+                <div class="table-wrap">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Order</th>
+                                <th>Customer</th>
+                                <th>Order date</th>
+                                <th>Delivery date</th>
+                                <th>Status</th>
+                                <th>Value</th>
+                                <th>Payment</th>
+                                <th>Fulfilment</th>
+                                <th>Driver / Route</th>
+                                <th>Notes / Issues</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% orders.forEach(order => {
+                                const isLate =
+                                    order.requested_delivery_date &&
+                                    new Date(order.requested_delivery_date) < new Date(new Date().toDateString()) &&
+                                    !['Delivered', 'Cancelled'].includes(order.status);
+                            %>
+                                <tr class="<%= isLate ? 'row-late' : '' %>">
+                                    <td><strong><%= order.order_number %></strong></td>
+                                    <td><%= order.customer %></td>
+                                    <td><%= formatDate(order.order_date) %></td>
+                                    <td><%= formatDate(order.requested_delivery_date) %></td>
+                                    <td><span class="badge <%= badgeTint(order.status) %>"><%= order.status %></span></td>
+                                    <td><%= formatMoney(order.total_value) %></td>
+                                    <td><span class="badge <%= badgeTint(order.payment_status) %>"><%= order.payment_status %></span></td>
+                                    <td><span class="badge <%= badgeTint(order.fulfilment_status) %>"><%= order.fulfilment_status %></span></td>
+                                    <td><%= order.assigned_driver_or_route || '—' %></td>
+                                    <td><%= order.notes || (isLate ? 'Late order needs action' : '—') %></td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
                 </div>
-                <% if (order.notes) { %>
-                  <div class="mt-2 text-sm text-slate-700"><%= order.notes %></div>
-                <% } %>
-              </div>
-            <% }) %>
-          <% } else { %>
-            <div class="text-sm text-slate-500">No late orders.</div>
-          <% } %>
-        </div>
-      </section>
+            </section>
 
-      <section class="rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div class="border-b border-slate-100 px-4 py-3">
-          <h2 class="text-base font-semibold">Delayed deliveries</h2>
-        </div>
-        <div class="p-4 space-y-3">
-          <% if (delayedDeliveries.length) { %>
-            <% delayedDeliveries.forEach(delivery => { %>
-              <div class="rounded-xl border border-slate-200 p-3">
-                <div class="flex flex-wrap items-center justify-between gap-2">
-                  <div>
-                    <div class="font-medium"><%= delivery.order_number %> · <%= delivery.customer %></div>
-                    <div class="text-sm text-slate-500">
-                      Scheduled <%= formatDate(delivery.scheduled_date) %>
-                    </div>
-                  </div>
-                  <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium <%= badgeClass(delivery.status) %>">
-                    <%= delivery.status %>
-                  </span>
+            <section class="panel">
+                <h2>Inventory</h2>
+                <div class="table-wrap">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>SKU</th>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Current stock</th>
+                                <th>Allocated</th>
+                                <th>Available</th>
+                                <th>Reorder point</th>
+                                <th>Supplier</th>
+                                <th>Last movement</th>
+                                <th>Alert</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% inventory.forEach(item => { %>
+                                <tr>
+                                    <td><strong><%= item.sku_code %></strong></td>
+                                    <td><%= item.name %></td>
+                                    <td><%= item.category || '—' %></td>
+                                    <td><%= item.current_stock %></td>
+                                    <td><%= item.allocated_stock %></td>
+                                    <td><%= item.available_stock %></td>
+                                    <td><%= item.reorder_point %></td>
+                                    <td><%= item.supplier || '—' %></td>
+                                    <td><%= formatDate(item.last_movement_at) %></td>
+                                    <td><span class="badge <%= badgeTint(item.alert) %>"><%= item.alert %></span></td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
                 </div>
-                <div class="mt-2 text-sm text-slate-600">
-                  Assigned: <%= delivery.assigned %>
-                </div>
-              </div>
-            <% }) %>
-          <% } else { %>
-            <div class="text-sm text-slate-500">No delayed deliveries.</div>
-          <% } %>
+            </section>
+
         </div>
-      </section>
-    </div>
-
-    <div class="grid gap-6 xl:grid-cols-2">
-      <section class="rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div class="border-b border-slate-100 px-4 py-3">
-          <h2 class="text-base font-semibold">Customers who owe money</h2>
-        </div>
-        <div class="p-4 overflow-x-auto">
-          <% if (overdueCustomers.length) { %>
-            <table class="min-w-full text-sm">
-              <thead>
-                <tr class="border-b border-slate-200 text-left text-slate-500">
-                  <th class="pb-2 pr-4 font-medium">Customer</th>
-                  <th class="pb-2 pr-4 font-medium">Overdue invoices</th>
-                  <th class="pb-2 pr-4 font-medium">Overdue amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                <% overdueCustomers.forEach(customer => { %>
-                  <tr class="border-b border-slate-100">
-                    <td class="py-3 pr-4 font-medium"><%= customer.name %></td>
-                    <td class="py-3 pr-4"><%= customer.overdue_invoice_count %></td>
-                    <td class="py-3 pr-4"><%= formatMoney(customer.overdue_amount) %></td>
-                  </tr>
-                <% }) %>
-              </tbody>
-            </table>
-          <% } else { %>
-            <div class="text-sm text-slate-500">No overdue customers.</div>
-          <% } %>
-        </div>
-      </section>
-
-      <section class="rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div class="border-b border-slate-100 px-4 py-3">
-          <h2 class="text-base font-semibold">Inventory alerts</h2>
-        </div>
-        <div class="p-4 space-y-3">
-          <% const inventoryAlerts = inventory.filter(item => item.alert !== 'ok'); %>
-          <% if (inventoryAlerts.length) { %>
-            <% inventoryAlerts.forEach(item => { %>
-              <div class="rounded-xl border border-slate-200 p-3">
-                <div class="flex flex-wrap items-center justify-between gap-2">
-                  <div>
-                    <div class="font-medium"><%= item.sku_code %> · <%= item.name %></div>
-                    <div class="text-sm text-slate-500">
-                      <%= item.category || 'Uncategorised' %> · <%= item.supplier || 'No supplier' %>
-                    </div>
-                  </div>
-                  <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium <%= badgeClass(item.alert) %>">
-                    <%= item.alert %>
-                  </span>
-                </div>
-
-                <div class="mt-2 grid grid-cols-2 gap-2 text-sm text-slate-700 md:grid-cols-4">
-                  <div>Current: <%= item.current_stock %></div>
-                  <div>Allocated: <%= item.allocated_stock %></div>
-                  <div>Available: <%= item.available_stock %></div>
-                  <div>Reorder point: <%= item.reorder_point %></div>
-                </div>
-
-                <div class="mt-2 text-xs text-slate-500">
-                  Last movement: <%= formatDate(item.last_movement_at) %>
-                </div>
-              </div>
-            <% }) %>
-          <% } else { %>
-            <div class="text-sm text-slate-500">No inventory alerts.</div>
-          <% } %>
-        </div>
-      </section>
-    </div>
-
-    <section class="rounded-2xl border border-slate-200 bg-white shadow-sm">
-      <div class="border-b border-slate-100 px-4 py-3">
-        <h2 class="text-base font-semibold">Orders</h2>
-      </div>
-      <div class="overflow-x-auto p-4">
-        <table class="min-w-full text-sm">
-          <thead>
-            <tr class="border-b border-slate-200 text-left text-slate-500">
-              <th class="pb-2 pr-4 font-medium">Order</th>
-              <th class="pb-2 pr-4 font-medium">Customer</th>
-              <th class="pb-2 pr-4 font-medium">Order date</th>
-              <th class="pb-2 pr-4 font-medium">Delivery date</th>
-              <th class="pb-2 pr-4 font-medium">Status</th>
-              <th class="pb-2 pr-4 font-medium">Value</th>
-              <th class="pb-2 pr-4 font-medium">Payment</th>
-              <th class="pb-2 pr-4 font-medium">Fulfilment</th>
-              <th class="pb-2 pr-4 font-medium">Driver / Route</th>
-              <th class="pb-2 pr-4 font-medium">Notes / Issues</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% orders.forEach(order => { 
-              const isLate =
-                order.requested_delivery_date &&
-                new Date(order.requested_delivery_date) < new Date(new Date().toDateString()) &&
-                !['Delivered', 'Cancelled'].includes(order.status);
-            %>
-              <tr class="border-b border-slate-100 <%= isLate ? 'bg-red-50' : '' %>">
-                <td class="py-3 pr-4 font-medium"><%= order.order_number %></td>
-                <td class="py-3 pr-4"><%= order.customer %></td>
-                <td class="py-3 pr-4"><%= formatDate(order.order_date) %></td>
-                <td class="py-3 pr-4"><%= formatDate(order.requested_delivery_date) %></td>
-                <td class="py-3 pr-4">
-                  <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium <%= badgeClass(order.status) %>">
-                    <%= order.status %>
-                  </span>
-                </td>
-                <td class="py-3 pr-4"><%= formatMoney(order.total_value) %></td>
-                <td class="py-3 pr-4">
-                  <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium <%= badgeClass(order.payment_status) %>">
-                    <%= order.payment_status %>
-                  </span>
-                </td>
-                <td class="py-3 pr-4">
-                  <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium <%= badgeClass(order.fulfilment_status) %>">
-                    <%= order.fulfilment_status %>
-                  </span>
-                </td>
-                <td class="py-3 pr-4"><%= order.assigned_driver_or_route || '—' %></td>
-                <td class="py-3 pr-4"><%= order.notes || (isLate ? 'Late order needs action' : '—') %></td>
-              </tr>
-            <% }) %>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <section class="rounded-2xl border border-slate-200 bg-white shadow-sm">
-      <div class="border-b border-slate-100 px-4 py-3">
-        <h2 class="text-base font-semibold">Inventory</h2>
-      </div>
-      <div class="overflow-x-auto p-4">
-        <table class="min-w-full text-sm">
-          <thead>
-            <tr class="border-b border-slate-200 text-left text-slate-500">
-              <th class="pb-2 pr-4 font-medium">SKU</th>
-              <th class="pb-2 pr-4 font-medium">Name</th>
-              <th class="pb-2 pr-4 font-medium">Category</th>
-              <th class="pb-2 pr-4 font-medium">Current stock</th>
-              <th class="pb-2 pr-4 font-medium">Allocated</th>
-              <th class="pb-2 pr-4 font-medium">Available</th>
-              <th class="pb-2 pr-4 font-medium">Reorder point</th>
-              <th class="pb-2 pr-4 font-medium">Supplier</th>
-              <th class="pb-2 pr-4 font-medium">Last movement</th>
-              <th class="pb-2 pr-4 font-medium">Alert</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% inventory.forEach(item => { %>
-              <tr class="border-b border-slate-100">
-                <td class="py-3 pr-4 font-medium"><%= item.sku_code %></td>
-                <td class="py-3 pr-4"><%= item.name %></td>
-                <td class="py-3 pr-4"><%= item.category || '—' %></td>
-                <td class="py-3 pr-4"><%= item.current_stock %></td>
-                <td class="py-3 pr-4"><%= item.allocated_stock %></td>
-                <td class="py-3 pr-4"><%= item.available_stock %></td>
-                <td class="py-3 pr-4"><%= item.reorder_point %></td>
-                <td class="py-3 pr-4"><%= item.supplier || '—' %></td>
-                <td class="py-3 pr-4"><%= formatDate(item.last_movement_at) %></td>
-                <td class="py-3 pr-4">
-                  <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium <%= badgeClass(item.alert) %>">
-                    <%= item.alert %>
-                  </span>
-                </td>
-              </tr>
-            <% }) %>
-          </tbody>
-        </table>
-      </div>
-    </section>
-  </div>
+    </main>
 </body>
 </html>

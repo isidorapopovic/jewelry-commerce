@@ -4,6 +4,7 @@ import path from "path";
 import fs from "fs/promises";
 import express from "express";
 import { fileURLToPath } from "url";
+import 'dotenv/config';
 
 import { seedTransactions, seedAutomations } from "./data/seed-data.js";
 import { query } from "./db/index.js";
