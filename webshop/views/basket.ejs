@@ -88,7 +88,9 @@
 
 <h2>Total: £<%= total.toFixed(2) %></h2>
 
-<button>Proceed to Checkout</button>
+<form action="/checkout" method="GET" style="margin:0">
+<button type="submit">Proceed to Checkout</button>
+</form>
 
 </div>
 

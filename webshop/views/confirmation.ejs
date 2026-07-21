@@ -1,0 +1,20 @@
+<%- include("partials/header") %>
+
+<div class="confirmation">
+
+    <h1>Thank you<% if (name) { %>, <%= name %><% } %>!</h1>
+
+    <p>Your order <strong><%= orderNumber %></strong> has been placed.</p>
+
+    <p class="confirmation-total">Order total: £<%= total.toFixed(2) %></p>
+
+    <p class="confirmation-note">
+        This order has been recorded in the analytics database and now
+        appears on the operations &amp; KPI dashboards.
+    </p>
+
+    <a href="/" class="button-link">Continue shopping</a>
+
+</div>
+
+<%- include("partials/footer") %>

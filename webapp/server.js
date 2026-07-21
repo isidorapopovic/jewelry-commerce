@@ -94,11 +94,27 @@ function computeByCategory(rows) {
 
 async function initDatabase() {
     try {
-        const schemaPath = path.join(__dirname, "db", "schema.sql");
-        const schemaSql = await fs.readFile(schemaPath, "utf8");
+        // schema.sql is destructive (it DROPs every table). Only run it on a
+        // brand-new database so we never wipe existing data — including orders
+        // and customers created by the web shop.
+        const existing = await query("SELECT to_regclass('public.orders') AS t");
+        const freshDb = !existing.rows[0].t;
 
-        await query(schemaSql);
-        console.log("✅ Database schema initialised");
+        if (freshDb) {
+            const schemaPath = path.join(__dirname, "db", "schema.sql");
+            const schemaSql = await fs.readFile(schemaPath, "utf8");
+            await query(schemaSql);
+            console.log("✅ Database schema created (fresh database)");
+        } else {
+            console.log("ℹ️  Existing database detected — skipping destructive schema rebuild");
+        }
+
+        // Idempotent migrations run on every startup (safe & non-destructive):
+        // add the product image column, seed the jewelry catalogue, etc.
+        const migratePath = path.join(__dirname, "db", "migrate.sql");
+        const migrateSql = await fs.readFile(migratePath, "utf8");
+        await query(migrateSql);
+        console.log("✅ Migrations applied");
 
         await query("SELECT refresh_overdue_statuses();");
         console.log("✅ Overdue statuses refreshed");
@@ -526,10 +542,10 @@ async function startServer() {
         await initDatabase();
 
         app.listen(PORT, "0.0.0.0", () => {
-            console.log(`✅ Server running on http://0.0.0.0:${PORT}`);
+            console.log(` Server running on http://0.0.0.0:${PORT}`);
         });
     } catch (err) {
-        console.error("❌ Server startup aborted");
+        console.error(" Server startup aborted");
         process.exit(1);
     }
 }

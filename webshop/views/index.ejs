@@ -12,7 +12,7 @@
 
 <h2><%= product.name %></h2>
 
-<p>£<%= product.price %></p>
+<p>£<%= product.price.toFixed(2) %></p>
 
 <a href="/product/<%= product.id %>">
 View
