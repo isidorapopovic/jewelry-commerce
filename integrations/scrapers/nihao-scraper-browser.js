@@ -98,27 +98,41 @@ function parseProduct(html, url) {
 
     const og = (p) => $(`meta[property="og:${p}"]`).attr("content");
 
-    const name = ld.name || og("title") || $("h1").first().text().trim();
+    let name = ld.name || og("title") || $("h1").first().text().trim();
+    // Nihao appends "- Nihaojewelry" to titles; strip it.
+    name = name.replace(/\s*[-–|]\s*Nihaojewelry\s*$/i, "").trim();
+
     const description =
         ld.description || og("description") ||
         $('meta[name="description"]').attr("content") || "";
 
-    // ---- Images: JSON-LD + all CDN gallery imgs, logo filtered out ----
-    let images = [];
-    if (ld.image) images = images.concat(Array.isArray(ld.image) ? ld.image : [ld.image]);
+    // ---- Images ----------------------------------------------------------
+    // Collect every candidate, then keep only real product photos: on the
+    // Nihao CDN, drop the logo AND promo badges (Local Warehouse, Ready to
+    // Ship, etc.), and prefer .jpg/.webp over .png (badges/logos are png).
+    let candidates = [];
+    if (ld.image) candidates = candidates.concat(Array.isArray(ld.image) ? ld.image : [ld.image]);
     $("img").each((_, el) => {
         const src =
             $(el).attr("data-large") || $(el).attr("data-original") ||
             $(el).attr("data-src") || $(el).attr("src");
-        if (src) images.push(src);
+        if (src) candidates.push(src);
     });
-    images = images
-        .map((s) => (s ? s.split("?")[0] : s))
-        .filter(isRealProductImage);
+    candidates = [...new Set(candidates.map((s) => (s ? s.split("?")[0] : s)).filter(Boolean))];
+
+    const BADGE = /nihaojewelry\.png|logo|placeholder|default|blank|loading|label|badge|warehouse|ready.?to.?ship|readyship|icon|sprite|tag|promotion|activity|market|coupon|flag/i;
+    let images = candidates
+        .filter((s) => /img\.nihaojewelry\.com|\/media\//.test(s) && !BADGE.test(s))
+        // upgrade the thumbnail rendition to a larger one when present
+        .map((s) => s.replace(/fit-in\/\d+x\d+/, "fit-in/800x800"))
+        // photos (jpg/webp/jpeg) first, png last
+        .sort((a, b) => (/\.png$/i.test(a) ? 1 : 0) - (/\.png$/i.test(b) ? 1 : 0));
     images = [...new Set(images)];
-    // last-resort: the (placeholder) og:image, only if nothing real was found
     if (!images.length && og("image")) images.push(og("image").split("?")[0]);
     images = images.slice(0, 8);
+
+    // Keep the full candidate list so we can debug if the wrong image is picked
+    const imageCandidates = candidates;
 
     // ---- Price: JSON-LD offers, else the "US$x–US$y" range in the copy ----
     let price = null;
@@ -178,6 +192,7 @@ function parseProduct(html, url) {
         image_url: images[0] || null,
         image_url_2: images[1] || null,
         images,
+        image_candidates: imageCandidates,   // debug: every image URL found on the page
         price_status: price && price > 0 ? "ok" : "needs_review",
         scraped_at: new Date().toISOString()
     };
