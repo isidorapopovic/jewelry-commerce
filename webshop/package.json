@@ -1,0 +1,19 @@
+{
+  "name": "webshop",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "axios": "^1.18.1",
+    "cheerio": "^1.2.0",
+    "dotenv": "^17.4.2",
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "express-session": "^1.18.1",
+    "pg": "^8.22.0"
+  },
+  "devDependencies": {
+    "eslint": "^10.7.0"
+  }
+}

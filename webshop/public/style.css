@@ -1,0 +1,143 @@
+body {
+    margin: 0;
+    font-family: Arial;
+    background: #f4f4f4;
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+    background: #222;
+}
+
+    nav a {
+        color: white;
+        text-decoration: none;
+        font-size: 20px;
+    }
+
+.container {
+    width: 90%;
+    margin: auto;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill,minmax(250px,1fr));
+    gap: 25px;
+    margin-top: 30px;
+}
+
+.card {
+    background: white;
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 5px 10px rgba(0,0,0,.1);
+}
+
+    .card img {
+        width: 100%;
+        border-radius: 10px;
+    }
+
+button {
+    padding: 10px 18px;
+    background: #0b7dda;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+    button:hover {
+        background: #095da5;
+    }
+
+.product {
+    display: flex;
+    gap: 40px;
+    margin-top: 30px;
+}
+
+    .product img {
+        width: 350px;
+    }
+
+.basket-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    margin: 20px 0;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+    .basket-item img {
+        width: 120px;
+    }
+
+.basket-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 30px;
+}
+
+    .basket-table th,
+    .basket-table td {
+        padding: 15px;
+        border-bottom: 1px solid #ddd;
+        text-align: center;
+    }
+
+    .basket-table img {
+        border-radius: 8px;
+    }
+
+.summary {
+    width: 320px;
+    margin-left: auto;
+    margin-top: 40px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,.1);
+}
+
+    .summary h2 {
+        margin-top: 0;
+    }
+
+    .summary button {
+        width: 100%;
+        margin-top: 20px;
+        padding: 12px;
+        font-size: 16px;
+    }
+
+.product-page {
+    display: flex;
+    gap: 50px;
+    margin-top: 40px;
+    align-items: flex-start;
+}
+
+.product-image img {
+    width: 450px;
+    border-radius: 10px;
+}
+
+.product-info {
+    flex: 1;
+}
+
+    .product-info h1 {
+        margin-top: 0;
+    }
+
+    .product-info button {
+        padding: 12px 25px;
+        font-size: 18px;
+    }
