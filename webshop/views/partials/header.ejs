@@ -1,23 +1,44 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-
-<title>My Shop</title>
-
-<link rel="stylesheet" href="/style.css">
-
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Elvora — Fine everyday jewellery</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Londrina+Solid:wght@100;300;400;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/style.css" />
 </head>
-
 <body>
 
-<nav>
+<header class="site-header">
+    <div class="header-inner">
 
-<a href="/">Home</a>
+        <a href="/" class="brand">
+            <span class="brand-name">Elvora</span>
+            <span class="brand-tag">Fine everyday jewellery</span>
+        </a>
 
-<a href="/basket">
-Basket (<%= basketSize %>)
-</a>
+        <nav class="main-nav">
+            <a href="/" class="<%= (typeof navActive !== 'undefined' && navActive === 'home') ? 'active' : '' %>">Home</a>
+            <a href="/#shop">Shop</a>
+            <a href="/#faq">FAQ</a>
+            <a href="/#about">About</a>
+            <a href="/#contact">Contact</a>
+        </nav>
 
-</nav>
+        <div class="header-actions">
+            <a href="#" class="login">
+                <span class="login-avatar">◍</span>
+                Log In
+            </a>
+            <a href="/basket" class="cart" aria-label="Basket">
+                🛍
+                <span class="cart-count"><%= basketSize %></span>
+            </a>
+        </div>
 
-<div class="container">
+    </div>
+</header>
+
+<main class="site-main">

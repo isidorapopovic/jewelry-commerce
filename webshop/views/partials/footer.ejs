@@ -1,5 +1,99 @@
-</div>
+</main>
+
+<footer class="site-footer" id="contact">
+
+    <div class="footer-top">
+
+        <div class="footer-brand">
+            <span class="brand-name">Elvora</span>
+            <div class="brand-tag">Fine everyday jewellery</div>
+        </div>
+
+        <div class="footer-cols">
+
+            <div class="footer-col">
+                <h4>Store Policy</h4>
+                <a href="#">Shipping Policy</a>
+                <a href="#">Refund Policy</a>
+                <a href="#">Terms &amp; Conditions</a>
+                <a href="/#faq">FAQ</a>
+            </div>
+
+            <div class="footer-col">
+                <h4>Legal</h4>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Accessibility Statement</a>
+            </div>
+
+            <div class="footer-col">
+                <h4>Contact</h4>
+                <p>123-456-7890</p>
+                <p>hello@elvora.com</p>
+                <div class="socials">
+                    <span>f</span>
+                    <span>ig</span>
+                    <span>tt</span>
+                    <span>p</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="footer-newsletter">
+        <h4>Join Our Mailing List</h4>
+        <p>Stay updated with our latest news and updates delivered straight to your inbox.</p>
+        <form class="newsletter-form" onsubmit="return false;">
+            <input type="email" placeholder="Enter your email" required />
+            <button type="submit">Join Now</button>
+        </form>
+    </div>
+
+</footer>
+
+<script>
+(function () {
+    // Reveal elements as they scroll into view (staggered)
+    var reveals = document.querySelectorAll('.reveal');
+    if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    io.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+
+        reveals.forEach(function (el, i) {
+            el.style.transitionDelay = (i % 4) * 80 + 'ms';
+            io.observe(el);
+        });
+    } else {
+        reveals.forEach(function (el) { el.classList.add('visible'); });
+    }
+
+    // Fade product images in once they finish loading
+    document.querySelectorAll('img.fade-img').forEach(function (img) {
+        if (img.complete && img.naturalWidth > 0) {
+            img.classList.add('img-loaded');
+        } else {
+            img.addEventListener('load', function () { img.classList.add('img-loaded'); });
+            img.addEventListener('error', function () { img.classList.add('img-loaded'); });
+        }
+    });
+
+    // Soft shadow on the header once the page is scrolled
+    var header = document.querySelector('.site-header');
+    if (header) {
+        var onScroll = function () {
+            header.classList.toggle('scrolled', window.scrollY > 8);
+        };
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+    }
+})();
+</script>
 
 </body>
-
 </html>

@@ -1,33 +1,43 @@
 <%- include("partials/header") %>
 
-<h1>Products</h1>
+<section class="hero" id="shop">
+    <h1 class="hero-title reveal">Jewellery With Attitude</h1>
+</section>
 
-<div class="grid">
+<section class="product-grid-wrap">
+    <div class="product-grid">
+        <% products.forEach(product => { %>
+            <div class="product-card reveal">
+                <div class="product-flip">
+                    <div class="flip-inner">
+                        <div class="flip-front">
+                            <a href="/product/<%= product.id %>" aria-label="<%= product.name %>">
+                                <img class="fade-img" src="<%= product.image %>" alt="<%= product.name %>" />
+                            </a>
+                        </div>
+                        <div class="flip-back">
+                            <form action="/basket/add/<%= product.id %>" method="POST">
+                                <button type="submit" class="btn btn-sm">Add to Basket</button>
+                            </form>
+                            <a href="/product/<%= product.id %>" class="flip-view">View details</a>
+                        </div>
+                    </div>
+                </div>
+                <h3 class="product-name"><%= product.name %></h3>
+                <p class="product-price">$<%= product.price.toFixed(2) %></p>
+            </div>
+        <% }) %>
+    </div>
+</section>
 
-<% products.forEach(product=>{ %>
+<section class="about reveal" id="about">
+    <h2 class="about-eyebrow">About</h2>
+    <p class="about-text">
+        This is the space to introduce your business and what it has to offer.
+        Define the qualities and values that make it unique.
+    </p>
+</section>
 
-<div class="card">
-
-<img src="<%= product.image %>">
-
-<h2><%= product.name %></h2>
-
-<p>£<%= product.price.toFixed(2) %></p>
-
-<a href="/product/<%= product.id %>">
-View
-</a>
-
-<form action="/basket/add/<%= product.id %>" method="POST">
-
-<button>Add to Basket</button>
-
-</form>
-
-</div>
-
-<% }) %>
-
-</div>
+<section class="lifestyle-band reveal" aria-hidden="true"></section>
 
 <%- include("partials/footer") %>
